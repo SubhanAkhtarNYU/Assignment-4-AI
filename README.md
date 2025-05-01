@@ -1,1 +1,13 @@
-# Assignment-4-AI
+**OpenRouter ReAct Agent PDDL Integration**
+
+This repository demonstrates a complete feedforward ReAct agent for routing incoming requests to the most appropriate LLM provider based on capabilities and cost constraints. The solution is organized into three artifacts: a PDDL domain definition (`domain.pddl`), a PDDL problem file (`problem.pddl`), and a Python notebook (`Assignment4.ipynb`) that implements the agent and invokes the Unified Planning library to solve the routing problem.
+
+The first phase involved ontology engineering to identify the key entities and relationships in the OpenRouter domain. We extracted five core types—`llm`, `provider`, `capability`, `account`, and `request`—and defined predicates that capture support relationships (`(supports llm capability)`), cost attributes (`(cost-per-m tokens llm provider ?cost)`), token limits (`(max-tokens llm ?limit)`), and account budget constraints (`(account-balance account ?amount)`). This structured representation ensures that the planning engine can reason about both functional requirements and monetary budgets.
+
+Next, we designed a set of actions to express the routing logic. The primary action, `route-request`, checks that an LLM supports all required capabilities of a request, that the request size does not exceed the LLM’s context window, and that the associated account has sufficient budget to pay for both prompt and completion tokens. Preconditions assert these requirements, while effects update the account balance to reflect the incurred cost and mark the request as routed to that LLM.
+
+The problem file instantiates concrete objects for a sample scenario: multiple LLMs (e.g., `gpt4o`, `llama2`), providers (`openai`, `huggingface`), capability labels (`code_support`, `multilingual`, `long_context`), and a user account with a defined dollar budget. We populate the initial state with facts about which LLMs offer which capabilities, their token limits, and per-token pricing. The goal specification simply requires that the request predicate is satisfied for at least one routed assignment.
+
+In the Python notebook, we leverage the Unified Planning library to parse and load the `domain.pddl` and `problem.pddl` files, select an available oneshot planner engine (e.g., Fast Downward), and invoke the solver to generate an execution plan. The notebook then prints a human-readable sequence of actions that demonstrates how the agent chooses the LLM provider that meets functional requirements at minimal cost.
+
+To run the solution, install the `unified_planning` package via `pip install unified_planning`, open `Assignment4.ipynb` in Jupyter or Colab, and execute all cells. The notebook loads the PDDL files, runs the planner, and outputs the routing plan. Adjust the problem file to test alternative scenarios or extend the domain with additional providers and capabilities.
